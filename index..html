@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sage Daily English</title>
+<style>
+  :root{
+    --bg:#f4efe6;--paper:#fbf8f1;--ink:#2b2722;--muted:#8a8175;
+    --line:#e3dccd;--sage:#7a4a86;--tom:#3f7a5c;--jim:#3a5a78;
+    --ted:#9c5b3b;--staff:#8a6a3d;--accent:#c0703f;
+    --rise:#2f7fb5;--fall:#c0563f;--soft:#f7f0e5;--green:#3f7a5c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased;padding:0 0 100px;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(rgba(120,100,70,.04) 1px,transparent 1px);
+    background-size:4px 4px;
+  }
+  header{position:relative;z-index:1;text-align:center;padding:36px 24px 18px;border-bottom:1px solid var(--line);}
+  .eyebrow{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:700;}
+  header h1{font-family:Georgia,serif;font-weight:500;font-style:italic;font-size:clamp(1.6rem,5vw,2.4rem);}
+  header .sub{color:var(--muted);font-size:.84rem;margin-top:6px;}
+  .save-badge{
+    display:inline-flex;align-items:center;gap:5px;font-size:.7rem;color:var(--green);
+    background:rgba(63,122,92,.1);border:1px solid rgba(63,122,92,.3);
+    border-radius:999px;padding:3px 10px;margin-top:8px;
+    opacity:0;transition:opacity .4s;
+  }
+  .save-badge.show{opacity:1;}
+  .save-badge::before{content:"●";font-size:.45rem;}
+
+  .generator{position:relative;z-index:1;max-width:820px;margin:20px auto 0;padding:0 20px;}
+  .generator-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 12px 36px -30px rgba(0,0,0,.3);}
+  .generator-title{font-family:Georgia,serif;font-style:italic;font-size:1.08rem;margin-bottom:6px;}
+  .generator-help{color:var(--muted);font-size:.82rem;margin-bottom:10px;}
+  textarea{width:100%;min-height:80px;resize:vertical;border:1px solid var(--line);border-radius:12px;background:#fffdf8;color:var(--ink);padding:11px 12px;font:inherit;outline:none;}
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,112,63,.15);}
+  .generator-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .primary-btn,.ghost-btn,.danger-btn{border-radius:999px;padding:8px 15px;font:inherit;font-size:.84rem;cursor:pointer;transition:all .2s;}
+  .primary-btn{background:var(--accent);color:#fff;border:1px solid var(--accent);}
+  .primary-btn:hover{filter:brightness(.94);}
+  .primary-btn:disabled{opacity:.55;cursor:not-allowed;}
+  .ghost-btn{background:none;color:var(--accent);border:1px solid var(--accent);}
+  .ghost-btn:hover{background:rgba(192,112,63,.08);}
+  .danger-btn{background:none;color:#c0563f;border:1px solid #c0563f;}
+  .danger-btn:hover{background:rgba(192,86,63,.08);}
+  .lesson-count{font-size:.76rem;color:var(--muted);margin-top:8px;}
+  .lesson-count strong{color:var(--accent);}
+
+  .ai-status{display:none;align-items:center;gap:8px;margin-top:10px;font-size:.84rem;color:var(--accent);}
+  .ai-status.show{display:flex;}
+  .spinner{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex:0 0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .tabs{position:relative;z-index:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:16px 20px 0;}
+  .tab{background:none;border:1px solid var(--line);color:var(--muted);font-family:Georgia,serif;font-style:italic;font-size:.88rem;padding:7px 14px;border-radius:10px 10px 0 0;cursor:pointer;transition:all .2s;position:relative;}
+  .tab.on{background:var(--paper);color:var(--ink);border-bottom-color:var(--paper);}
+  .tab .tab-del{display:none;position:absolute;top:-7px;right:-7px;width:17px;height:17px;border-radius:50%;background:#c0563f;color:#fff;font-size:.55rem;line-height:17px;text-align:center;cursor:pointer;border:none;font-weight:700;}
+  .tab:hover .tab-del{display:block;}
+
+  .controls{position:relative;z-index:1;max-width:820px;margin:12px auto 0;padding:0 20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .ctrl-btn{background:none;border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:.8rem;padding:6px 14px;border-radius:999px;cursor:pointer;transition:all .2s;}
+  .ctrl-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .ctrl-btn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  main{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:26px 20px;}
+  .title-card{font-family:Georgia,serif;font-weight:600;font-size:1.35rem;letter-spacing:.04em;text-transform:uppercase;text-align:center;margin-bottom:5px;}
+  .title-ko{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:5px;}
+  .title-rule{width:48px;height:2px;background:var(--accent);margin:0 auto 26px;}
+  .ai-badge{display:inline-block;font-size:.6rem;background:var(--sage);color:#fff;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle;font-family:inherit;font-style:normal;}
+
+  .line{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:9px;transition:border-color .2s,box-shadow .2s;}
+  .line.speaking{border-color:var(--accent);box-shadow:0 0 0 2px rgba(192,112,63,.2);}
+  .line-top{display:flex;gap:10px;align-items:flex-start;}
+  .who{flex:0 0 auto;font-family:Georgia,serif;font-weight:700;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:7px;color:#fff;margin-top:4px;min-width:50px;text-align:center;}
+  .who.sage{background:var(--sage);}.who.tom{background:var(--tom);}.who.jim{background:var(--jim);}.who.ted{background:var(--ted);}.who.staff{background:var(--staff);}.who.narr{background:var(--muted);}
+  .en{flex:1;min-width:0;font-family:Georgia,serif;font-size:1.12rem;cursor:pointer;}
+  .play-ico{flex:0 0 auto;color:var(--muted);font-size:.95rem;margin-top:5px;cursor:pointer;transition:color .2s;}
+  .line:hover .play-ico{color:var(--accent);}
+  .reveal{margin:8px 0 0 60px;display:flex;gap:7px;flex-wrap:wrap;}
+  .pill{background:none;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:.72rem;padding:3px 10px;border-radius:999px;cursor:pointer;transition:all .2s;}
+  .pill:hover{border-color:var(--accent);color:var(--accent);}
+  .pill.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .ipa,.sound,.ko,.note{margin:0 0 0 60px;max-height:0;overflow:hidden;opacity:0;transition:max-height .3s,opacity .3s,margin .3s;}
+  .ipa.show,.sound.show,.ko.show,.note.show{max-height:240px;opacity:1;margin-top:7px;}
+  .ipa{font-family:Georgia,serif;font-size:1rem;color:#4d463e;line-height:1.8;}
+  .sound{font-size:.98rem;color:#5a5247;line-height:1.8;}
+  .ipa .rise,.sound .rise{color:var(--rise);font-weight:700;}
+  .ipa .fall,.sound .fall{color:var(--fall);font-weight:700;}
+  .ko{font-size:.9rem;color:var(--muted);}
+  .note{font-size:.84rem;color:#6f6558;background:var(--soft);border-left:3px solid var(--accent);padding:7px 10px;border-radius:0 9px 9px 0;}
+  body.all-ipa .ipa,body.all-sound .sound,body.all-ko .ko,body.all-note .note{max-height:240px;opacity:1;margin-top:7px;}
+
+  footer{position:relative;z-index:1;text-align:center;color:var(--muted);font-size:.76rem;padding:22px 20px;line-height:1.8;}
+  .legend{display:inline-flex;gap:12px;margin-top:5px;}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .playall{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:5;background:var(--ink);color:var(--paper);border:none;border-radius:999px;font-family:Georgia,serif;font-size:.9rem;padding:11px 26px;cursor:pointer;box-shadow:0 8px 28px -8px rgba(0,0,0,.5);transition:background .2s;white-space:nowrap;}
+  .playall:hover{background:var(--accent);}
+  @media(max-width:540px){.reveal,.ipa,.sound,.ko,.note{margin-left:0;}.line-top{gap:8px;}.who{min-width:44px;}.en{font-size:1.05rem;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">English Again · After 40 Years</div>
+  <h1 id="hTitle">Starting Again</h1>
+  <div class="sub">Sage Kwang-ho Choi · 40년 만에 다시 시작하는 하루 한 페이지 영어</div>
+  <div class="save-badge" id="saveBadge">자동 저장됨</div>
+</header>
+
+<section class="generator">
+  <div class="generator-card">
+    <div class="generator-title">✨ AI로 맞춤 영어 대화 만들기</div>
+    <p class="generator-help">어떤 상황이든 입력하면 Claude AI가 그 상황에 딱 맞는 영어 대화를 만들어 드립니다.</p>
+    <textarea id="situationInput" placeholder="예: 친구와 식당에서 메뉴 고르는 상황, 사우디 바이어에게 납기 설명, 병원에서 증상 말하는 상황..."></textarea>
+    <div class="generator-actions">
+      <button class="primary-btn" id="makeLesson">✨ AI 레슨 만들기</button>
+      <button class="ghost-btn" id="sampleCafe">예시: 카페</button>
+      <button class="ghost-btn" id="samplePen">예시: 만년필</button>
+      <button class="ghost-btn" id="sampleWork">예시: 회사</button>
+      <button class="danger-btn" id="resetLessons">전체 초기화</button>
+    </div>
+    <div class="ai-status" id="aiStatus">
+      <div class="spinner"></div>
+      <span id="aiStatusText">Claude AI가 레슨을 만들고 있습니다...</span>
+    </div>
+    <div class="lesson-count" id="lessonCount"></div>
+  </div>
+</section>
+
+<div class="tabs" id="tabs"></div>
+<div class="controls">
+  <button class="ctrl-btn" id="ipaAll">IPA: 펼쳐서 보기</button>
+  <button class="ctrl-btn" id="soundAll">실전 발음: 펼쳐서 보기</button>
+  <button class="ctrl-btn" id="koAll">한글 뜻: 펼쳐서 보기</button>
+  <button class="ctrl-btn" id="noteAll">표현 메모: 펼쳐서 보기</button>
+  <button class="ctrl-btn" id="speed">속도: 보통</button>
+</div>
+<main id="app"></main>
+
+<footer>
+  영어 문장 또는 🔊 를 누르면 음성이 재생됩니다.
+  <br/>
+  <span class="legend">
+    <span><span class="dot" style="background:var(--rise)"></span>↗ 올림</span>
+    <span><span class="dot" style="background:var(--fall)"></span>↘ 내림</span>
+  </span>
+</footer>
+<button class="playall" id="playAll">▶ 전체 듣기</button>
+
+<script>
+const S={
+  get(k,fb){try{const v=localStorage.getItem(k);return v===null?fb:JSON.parse(v);}catch(e){return fb;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+
+const BASE=[
+  {title:"Starting Again",titleKo:"다시 시작하기",aiMade:false,lines:[
+    mk("Sage","I am learning English again.","/aɪ əm ˈlɝːnɪŋ ˈɪŋɡlɪʃ əˈɡen/","아이 엄 러닝 잉글리쉬 어겐","나는 영어를 다시 배우고 있습니다.","again은 '다시'라는 뜻입니다."),
+    mk("Tom","That is a wonderful start.","/ðæt ɪz ə ˈwʌndərfəl stɑːrt/","댓 이즈 어 원더풀 스타트","그건 아주 멋진 시작입니다.","wonderful start는 시작을 격려할 때 좋은 표현입니다."),
+    mk("Sage","I studied English a long time ago.","/aɪ ˈstʌdid ˈɪŋɡlɪʃ ə lɔːŋ taɪm əˈɡoʊ/","아이 스터디드 잉글리쉬 어 롱 타임 어고우","나는 오래전에 영어를 공부했습니다.","a long time ago는 '오래전에'라는 뜻입니다."),
+    mk("Tom","Then you are not a beginner.","/ðen ju ɑːr nɑːt ə bɪˈɡɪnər/","덴 유 아 낫 어 비기너","그럼 당신은 완전한 초보자가 아닙니다.","다시 시작하는 사람에게 자신감을 주는 문장입니다."),
+    mk("Sage","Maybe I just need to wake it up.","/ˈmeɪbi aɪ dʒʌst niːd tə weɪk ɪt ʌp/","메이비 아이 저스트 니드 투 웨이크 잇 업","잠들어 있던 영어를 깨우면 될 것 같습니다.","wake it up은 기억을 다시 깨운다는 느낌입니다."),
+    mk("Tom","One sentence a day is enough.","/wʌn ˈsentəns ə deɪ ɪz ɪˈnʌf/","원 센턴스 어 데이 이즈 이너프","하루 한 문장이면 충분합니다.","앱의 대표 문장입니다.")
+  ]},
+  {title:"Morning Practice",titleKo:"아침 영어 연습",aiMade:false,lines:[
+    mk("Sage","The morning is a good time to practice.","/ðə ˈmɔːrnɪŋ ɪz ə ɡʊd taɪm tə ˈpræktɪs/","더 모닝 이즈 어 굿 타임 투 프랙티스","아침은 연습하기 좋은 시간입니다.","a good time to...는 '...하기 좋은 시간'입니다."),
+    mk("Tom","Your mind is fresh in the morning.","/jʊr maɪnd ɪz freʃ ɪn ðə ˈmɔːrnɪŋ/","유어 마인드 이즈 프레쉬 인 더 모닝","아침에는 마음이 맑습니다.","fresh는 공기, 마음, 생각에 모두 쓸 수 있습니다."),
+    mk("Sage","I will read one line aloud.","/aɪ wɪl riːd wʌn laɪn əˈlaʊd/","아이 윌 리드 원 라인 얼라우드","한 줄을 소리 내어 읽겠습니다.","aloud는 '소리 내어'라는 뜻입니다."),
+    mk("Tom","Listen first, then speak slowly.","/ˈlɪsən fɝːst ðen spiːk ˈsloʊli/","리슨 퍼스트, 덴 스피크 슬로울리","먼저 듣고, 그다음 천천히 말하세요.","영어 회화 연습의 기본 순서입니다."),
+    mk("Sage","I do not have to be perfect today.","/aɪ duː nɑːt hæv tə bi ˈpɝːfɪkt təˈdeɪ/","아이 두 낫 해브 투 비 퍼펙트 투데이","오늘 완벽할 필요는 없습니다.","do not have to는 '...할 필요가 없다'입니다."),
+    mk("Tom","You only have to continue.","/ju ˈoʊnli hæv tə kənˈtɪnjuː/","유 온리 해브 투 컨티뉴","계속하기만 하면 됩니다.","continue는 꾸준함을 표현하는 중요한 단어입니다.")
+  ]}
+];
+
+let LESSONS=S.get("sageEng_v4_lessons",BASE);
+let cur=S.get("sageEng_v4_cur",0);
+let rate=S.get("sageEng_v4_rate",1.0);
+let ipaOn=S.get("sageEng_v4_ipa",false);
+let soundOn=S.get("sageEng_v4_sound",false);
+let koOn=S.get("sageEng_v4_ko",false);
+let noteOn=S.get("sageEng_v4_note",false);
+if(cur<0||cur>=LESSONS.length)cur=0;
+
+const app=document.getElementById("app");
+const hTitle=document.getElementById("hTitle");
+const tabsBox=document.getElementById("tabs");
+const playAllBtn=document.getElementById("playAll");
+const makeLessonBtn=document.getElementById("makeLesson");
+const aiStatus=document.getElementById("aiStatus");
+let playing=false,lineEls=[],voice=null,badgeTimer=null;
+
+function saveAll(){S.set("sageEng_v4_lessons",LESSONS);S.set("sageEng_v4_cur",cur);flash();updateCount();}
+function flash(){const b=document.getElementById("saveBadge");b.classList.add("show");clearTimeout(badgeTimer);badgeTimer=setTimeout(()=>b.classList.remove("show"),2200);}
+function updateCount(){document.getElementById("lessonCount").innerHTML=`총 <strong>${LESSONS.length}</strong>개 레슨 저장됨`;}
+
+// ── Claude AI 호출 (아티팩트 전용 방식) ─────────────────
+async function generateWithAI(situation){
+  const PROMPT=`당신은 한국인 영어 학습자를 위한 영어 대화 레슨 생성기입니다.
+
+아래 한국어 상황에 딱 맞는 실용적인 영어 대화 레슨을 만들어 주세요.
+
+상황: "${situation}"
+
+반드시 아래 JSON 형식으로만 응답하세요. 마크다운 코드블록(백틱) 없이 순수 JSON만 출력하세요:
+
+{"title":"영어 레슨 제목(영어 3-5단어)","lines":[{"who":"Sage","en":"영어 문장","ipa":"/IPA/","sound":"한글발음","ko":"한국어뜻","note":"학습포인트(한국어)"},{"who":"Tom","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Sage","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Tom","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Sage","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Tom","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."}]}
+
+규칙: lines는 정확히 6개, Sage(학습자)와 Tom이 번갈아 대화, 중급 수준 문장, 상황에 완전히 맞는 어휘 사용.`;
+
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"claude-sonnet-4-20250514",
+      max_tokens:1200,
+      messages:[{role:"user",content:PROMPT}]
+    })
+  });
+
+  if(!res.ok) throw new Error(`API error: ${res.status}`);
+  const data=await res.json();
+
+  // content 블록에서 텍스트 추출
+  const text=data.content
+    .filter(c=>c.type==="text")
+    .map(c=>c.text)
+    .join("");
+
+  // JSON 파싱 — 백틱 제거 후 시도
+  const clean=text.replace(/```json|```/gi,"").trim();
+  let parsed;
+  try{
+    parsed=JSON.parse(clean);
+  }catch(e){
+    // JSON 블록만 추출 시도
+    const m=clean.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error("JSON not found in response");
+    parsed=JSON.parse(m[0]);
+  }
+
+  return {
+    title:parsed.title||"New Lesson",
+    titleKo:situation.length>34?situation.slice(0,34)+"...":situation,
+    aiMade:true,
+    lines:parsed.lines.map(l=>mk(
+      l.who||"Sage",l.en||"",l.ipa||"",l.sound||"",l.ko||"",l.note||""
+    ))
+  };
+}
+
+// ── 렌더 ─────────────────────────────────────────────────
+function colorize(s){return String(s||"").replace(/↗/g,'<span class="rise">↗</span>').replace(/↘/g,'<span class="fall">↘</span>');}
+function wc(w){return({Sage:"sage",Tom:"tom",Jim:"jim",Ted:"ted",Staff:"staff"})[w]||"narr";}
+
+function render(){
+  app.innerHTML="";lineEls=[];
+  const L=LESSONS[cur];
+  hTitle.textContent=L.title;
+  const tc=d("title-card");
+  tc.innerHTML=esc(L.title)+(L.aiMade?'<span class="ai-badge">AI</span>':'');
+  app.appendChild(tc);
+  const tk=d("title-ko");tk.textContent=L.titleKo;app.appendChild(tk);
+  app.appendChild(d("title-rule"));
+  L.lines.forEach((l,i)=>{
+    const row=d("line");
+    row.innerHTML=`<div class="line-top"><span class="who ${wc(l.who)}">${l.who||"·"}</span><div class="en">${esc(l.en)}</div><span class="play-ico">🔊</span></div>
+    <div class="reveal"><button class="pill" data-t="ipa">IPA</button><button class="pill" data-t="sound">실전 발음</button><button class="pill" data-t="ko">한글 뜻</button><button class="pill" data-t="note">표현 메모</button></div>
+    <div class="ipa">${colorize(esc(l.ipa))}</div><div class="sound">${colorize(esc(l.sound))}</div><div class="ko">${esc(l.ko)}</div><div class="note">${esc(l.note)}</div>`;
+    row.querySelector(".en").addEventListener("click",()=>speak(l.en,i));
+    row.querySelector(".play-ico").addEventListener("click",()=>speak(l.en,i));
+    row.querySelectorAll(".pill").forEach(p=>p.addEventListener("click",()=>{row.querySelector("."+p.dataset.t).classList.toggle("show");p.classList.toggle("on");}));
+    app.appendChild(row);lineEls.push(row);
+  });
+  buildTabs();applyModes();updateCount();
+}
+
+function buildTabs(){
+  tabsBox.innerHTML="";
+  LESSONS.forEach((L,i)=>{
+    const b=document.createElement("button");
+    b.className="tab"+(i===cur?" on":"");
+    b.textContent=(i+1)+". "+L.title;
+    if(L.aiMade){const bd=document.createElement("span");bd.className="ai-badge";bd.textContent="AI";b.appendChild(bd);}
+    if(i>=2){
+      const x=document.createElement("button");x.className="tab-del";x.textContent="✕";
+      x.addEventListener("click",e=>{e.stopPropagation();if(!confirm(`"${L.title}" 삭제할까요?`))return;LESSONS.splice(i,1);if(cur>=LESSONS.length)cur=LESSONS.length-1;saveAll();stopAll();render();});
+      b.appendChild(x);
+    }
+    b.addEventListener("click",()=>{cur=i;S.set("sageEng_v4_cur",cur);stopAll();render();window.scrollTo({top:0,behavior:"smooth"});});
+    tabsBox.appendChild(b);
+  });
+}
+
+// ── TTS ──────────────────────────────────────────────────
+function pickVoice(){if(typeof speechSynthesis==="undefined")return;const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en-US/i.test(v.lang)&&/samantha|allison|ava|zira|jenny/i.test(v.name))||vs.find(v=>/en-US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null;}
+if(typeof speechSynthesis!=="undefined"){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(text,idx){if(typeof speechSynthesis==="undefined")return;speechSynthesis.cancel();pickVoice();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate;if(voice)u.voice=voice;lineEls.forEach(e=>e.classList.remove("speaking"));if(idx!=null){lineEls[idx].classList.add("speaking");u.onend=()=>lineEls[idx].classList.remove("speaking");}speechSynthesis.speak(u);}
+function stopAll(){if(typeof speechSynthesis!=="undefined")speechSynthesis.cancel();playing=false;playAllBtn.textContent="▶ 전체 듣기";lineEls.forEach(e=>e.classList.remove("speaking"));}
+playAllBtn.addEventListener("click",function(){if(playing){stopAll();return;}if(typeof speechSynthesis==="undefined")return;playing=true;this.textContent="■ 멈춤";const L=LESSONS[cur];let i=0;const next=()=>{if(!playing||i>=L.lines.length){stopAll();return;}speechSynthesis.cancel();pickVoice();lineEls.forEach(e=>e.classList.remove("speaking"));lineEls[i].classList.add("speaking");lineEls[i].scrollIntoView({behavior:"smooth",block:"center"});const u=new SpeechSynthesisUtterance(L.lines[i].en);u.lang="en-US";u.rate=rate;if(voice)u.voice=voice;u.onend=()=>{i++;setTimeout(next,450);};speechSynthesis.speak(u);};next();});
+
+// ── 토글 ─────────────────────────────────────────────────
+function applyModes(){document.body.classList.toggle("all-ipa",ipaOn);document.body.classList.toggle("all-sound",soundOn);document.body.classList.toggle("all-ko",koOn);document.body.classList.toggle("all-note",noteOn);sc("ipaAll",ipaOn,"IPA");sc("soundAll",soundOn,"실전 발음");sc("koAll",koOn,"한글 뜻");sc("noteAll",noteOn,"표현 메모");}
+function sc(id,on,label){const b=document.getElementById(id);b.classList.toggle("on",on);b.textContent=on?`${label}: 항상 보기`:`${label}: 펼쳐서 보기`;}
+document.getElementById("ipaAll").addEventListener("click",()=>{ipaOn=!ipaOn;S.set("sageEng_v4_ipa",ipaOn);applyModes();});
+document.getElementById("soundAll").addEventListener("click",()=>{soundOn=!soundOn;S.set("sageEng_v4_sound",soundOn);applyModes();});
+document.getElementById("koAll").addEventListener("click",()=>{koOn=!koOn;S.set("sageEng_v4_ko",koOn);applyModes();});
+document.getElementById("noteAll").addEventListener("click",()=>{noteOn=!noteOn;S.set("sageEng_v4_note",noteOn);applyModes();});
+
+// ── 속도 ─────────────────────────────────────────────────
+const speeds=[{r:1.0,l:"속도: 보통"},{r:0.82,l:"속도: 천천히"},{r:0.68,l:"속도: 아주 천천히"}];
+let si=speeds.findIndex(s=>Math.abs(s.r-rate)<0.01);if(si<0)si=0;
+const spBtn=document.getElementById("speed");spBtn.textContent=speeds[si].l;
+spBtn.addEventListener("click",function(){si=(si+1)%speeds.length;rate=speeds[si].r;S.set("sageEng_v4_rate",rate);this.textContent=speeds[si].l;});
+
+// ── 예시 ─────────────────────────────────────────────────
+document.getElementById("sampleCafe").addEventListener("click",()=>{document.getElementById("situationInput").value="카페에서 따뜻한 커피를 주문하고 창가 자리를 부탁하는 상황";});
+document.getElementById("samplePen").addEventListener("click",()=>{document.getElementById("situationInput").value="만년필에서 잉크가 새서 수리점에 조심스럽게 문의하는 상황";});
+document.getElementById("sampleWork").addEventListener("click",()=>{document.getElementById("situationInput").value="거래처에 펌프 납기 지연을 정중하게 알리는 상황";});
+document.getElementById("resetLessons").addEventListener("click",()=>{if(!confirm("모든 레슨을 초기화할까요?"))return;LESSONS=BASE.map(l=>({...l}));cur=0;saveAll();stopAll();render();});
+
+// ── AI 레슨 만들기 ────────────────────────────────────────
+makeLessonBtn.addEventListener("click",async()=>{
+  const input=document.getElementById("situationInput").value.trim();
+  if(!input){alert("상황을 먼저 입력해 주세요.");return;}
+  makeLessonBtn.disabled=true;
+  makeLessonBtn.textContent="생성 중...";
+  aiStatus.classList.add("show");
+  try{
+    const lesson=await generateWithAI(input);
+    const idx=LESSONS.findIndex(x=>x.title===lesson.title);
+    if(idx>=0)LESSONS.splice(idx,1);
+    LESSONS.unshift(lesson);
+    cur=0;
+    saveAll();stopAll();render();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }catch(e){
+    console.error(e);
+    alert("AI 레슨 생성 중 오류가 발생했습니다.\n\n"+e.message);
+  }finally{
+    makeLessonBtn.disabled=false;
+    makeLessonBtn.textContent="✨ AI 레슨 만들기";
+    aiStatus.classList.remove("show");
+  }
+});
+
+// ── 유틸 ─────────────────────────────────────────────────
+function mk(who,en,ipa,sound,ko,note){return{who,en,ipa,sound,ko,note};}
+function d(cls){const e=document.createElement("div");if(cls)e.className=cls;return e;}
+function esc(t){return String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+
+render();
+</script>
+</body>
+</html>
