@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
@@ -103,7 +103,20 @@
   .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
   .playall{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:5;background:var(--ink);color:var(--paper);border:none;border-radius:999px;font-family:Georgia,serif;font-size:.9rem;padding:11px 26px;cursor:pointer;box-shadow:0 8px 28px -8px rgba(0,0,0,.5);transition:background .2s;white-space:nowrap;}
   .playall:hover{background:var(--accent);}
+
+  .key-warn{position:relative;z-index:1;max-width:820px;margin:14px auto 0;padding:0 20px;}
+  .key-warn-inner{background:#fff4e8;border:1px solid var(--accent);border-radius:12px;padding:12px 14px;font-size:.82rem;color:#8a5a2d;}
+  .key-warn-inner b{color:var(--accent);}
+
   @media(max-width:540px){.reveal,.ipa,.sound,.ko,.note{margin-left:0;}.line-top{gap:8px;}.who{min-width:44px;}.en{font-size:1.05rem;}}
+  .mode-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .mode-tab{flex:1;min-width:120px;background:none;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:.84rem;padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .2s;}
+  .mode-tab.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .mode-panel{display:none;}
+  .mode-panel.on{display:block;}
+  .copy-box{background:#fffdf8;border:1px dashed var(--accent);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:.8rem;color:#5a5247;white-space:pre-wrap;max-height:160px;overflow:auto;font-family:monospace;line-height:1.5;}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;margin-right:6px;flex:0 0 auto;}
+  .step-row{display:flex;align-items:flex-start;gap:4px;margin:8px 0;font-size:.84rem;color:#5a5247;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -116,20 +129,41 @@
 
 <section class="generator">
   <div class="generator-card">
-    <div class="generator-title">✨ AI로 맞춤 영어 대화 만들기</div>
-    <p class="generator-help">어떤 상황이든 입력하면 Claude AI가 그 상황에 딱 맞는 영어 대화를 만들어 드립니다.</p>
-    <textarea id="situationInput" placeholder="예: 친구와 식당에서 메뉴 고르는 상황, 사우디 바이어에게 납기 설명, 병원에서 증상 말하는 상황..."></textarea>
-    <div class="generator-actions">
-      <button class="primary-btn" id="makeLesson">✨ AI 레슨 만들기</button>
-      <button class="ghost-btn" id="sampleCafe">예시: 카페</button>
-      <button class="ghost-btn" id="samplePen">예시: 만년필</button>
-      <button class="ghost-btn" id="sampleWork">예시: 회사</button>
-      <button class="danger-btn" id="resetLessons">전체 초기화</button>
+    <div class="mode-tabs">
+      <button class="mode-tab on" id="modeQuick">⚡ 빠른 생성 (무료·즉시)</button>
+      <button class="mode-tab" id="modeAI">🤖 AI 정밀 생성 (복붙)</button>
     </div>
-    <div class="ai-status" id="aiStatus">
-      <div class="spinner"></div>
-      <span id="aiStatusText">Claude AI가 레슨을 만들고 있습니다...</span>
+
+    <!-- 빠른 생성 모드 -->
+    <div class="mode-panel on" id="panelQuick">
+      <div class="generator-title">⚡ 상황을 입력하면 바로 레슨을 만듭니다</div>
+      <p class="generator-help">카페·식당·만년필·회사·여행·병원·사격장·펌프 등 다양한 상황을 인식합니다. 키도 인터넷도 필요 없어요.</p>
+      <textarea id="situationInput" placeholder="예: 식당에서 친구와 메뉴 고르기, 사격장에서 안전 수칙 이야기, 병원에서 증상 말하기..."></textarea>
+      <div class="generator-actions">
+        <button class="primary-btn" id="makeLesson">⚡ 레슨 만들기</button>
+        <button class="ghost-btn" id="sampleCafe">예시: 카페</button>
+        <button class="ghost-btn" id="samplePen">예시: 만년필</button>
+        <button class="ghost-btn" id="sampleWork">예시: 회사</button>
+        <button class="danger-btn" id="resetLessons">전체 초기화</button>
+      </div>
     </div>
+
+    <!-- AI 복붙 모드 -->
+    <div class="mode-panel" id="panelAI">
+      <div class="generator-title">🤖 AI에게 맡겨 더 정교한 대화 만들기</div>
+      <p class="generator-help">특별한 상황은 AI(Gemini·Claude·ChatGPT 등)에게 맡기면 더 자연스러워요. API 키 없이, 복사·붙여넣기만 하면 됩니다.</p>
+      <textarea id="situationInputAI" placeholder="예: 사우디 바이어에게 펌프 납기 지연을 정중히 설명하는 상황..."></textarea>
+      <div class="generator-actions">
+        <button class="primary-btn" id="copyPromptBtn">① 프롬프트 복사</button>
+      </div>
+      <div class="step-row"><span class="step-num">1</span> 위 버튼으로 프롬프트를 복사해, AI(Gemini/Claude)에 붙여넣고 답을 받으세요.</div>
+      <div class="step-row"><span class="step-num">2</span> AI가 준 결과(JSON)를 아래 칸에 통째로 붙여넣으세요.</div>
+      <textarea id="aiResultInput" placeholder="AI가 만들어준 결과(JSON)를 여기에 붙여넣기" style="margin-top:8px;"></textarea>
+      <div class="generator-actions">
+        <button class="primary-btn" id="importAIBtn">② 레슨으로 가져오기</button>
+      </div>
+    </div>
+
     <div class="lesson-count" id="lessonCount"></div>
   </div>
 </section>
@@ -179,81 +213,158 @@ const BASE=[
   ]}
 ];
 
-let LESSONS=S.get("sageEng_v4_lessons",BASE);
-let cur=S.get("sageEng_v4_cur",0);
-let rate=S.get("sageEng_v4_rate",1.0);
-let ipaOn=S.get("sageEng_v4_ipa",false);
-let soundOn=S.get("sageEng_v4_sound",false);
-let koOn=S.get("sageEng_v4_ko",false);
-let noteOn=S.get("sageEng_v4_note",false);
+let LESSONS=S.get("sageHybrid_lessons",BASE);
+let cur=S.get("sageHybrid_cur",0);
+let rate=S.get("sageHybrid_rate",1.0);
+let ipaOn=S.get("sageHybrid_ipa",false);
+let soundOn=S.get("sageHybrid_sound",false);
+let koOn=S.get("sageHybrid_ko",false);
+let noteOn=S.get("sageHybrid_note",false);
 if(cur<0||cur>=LESSONS.length)cur=0;
 
 const app=document.getElementById("app");
 const hTitle=document.getElementById("hTitle");
 const tabsBox=document.getElementById("tabs");
 const playAllBtn=document.getElementById("playAll");
-const makeLessonBtn=document.getElementById("makeLesson");
-const aiStatus=document.getElementById("aiStatus");
 let playing=false,lineEls=[],voice=null,badgeTimer=null;
 
-function saveAll(){S.set("sageEng_v4_lessons",LESSONS);S.set("sageEng_v4_cur",cur);flash();updateCount();}
+function saveAll(){S.set("sageHybrid_lessons",LESSONS);S.set("sageHybrid_cur",cur);flash();updateCount();}
 function flash(){const b=document.getElementById("saveBadge");b.classList.add("show");clearTimeout(badgeTimer);badgeTimer=setTimeout(()=>b.classList.remove("show"),2200);}
 function updateCount(){document.getElementById("lessonCount").innerHTML=`총 <strong>${LESSONS.length}</strong>개 레슨 저장됨`;}
 
-// ── Claude AI 호출 (아티팩트 전용 방식) ─────────────────
-async function generateWithAI(situation){
-  const PROMPT=`당신은 한국인 영어 학습자를 위한 영어 대화 레슨 생성기입니다.
+// ── 모드 전환 ────────────────────────────────────────────
+document.getElementById("modeQuick").addEventListener("click",()=>setMode("quick"));
+document.getElementById("modeAI").addEventListener("click",()=>setMode("ai"));
+function setMode(m){
+  document.getElementById("modeQuick").classList.toggle("on",m==="quick");
+  document.getElementById("modeAI").classList.toggle("on",m==="ai");
+  document.getElementById("panelQuick").classList.toggle("on",m==="quick");
+  document.getElementById("panelAI").classList.toggle("on",m==="ai");
+}
 
-아래 한국어 상황에 딱 맞는 실용적인 영어 대화 레슨을 만들어 주세요.
-
+// ── 프롬프트 만들기 (복붙 모드) ──────────────────────────
+function buildPrompt(situation){
+  return `한국인 영어 학습자를 위한 영어 대화 레슨을 만들어 주세요.
 상황: "${situation}"
 
-반드시 아래 JSON 형식으로만 응답하세요. 마크다운 코드블록(백틱) 없이 순수 JSON만 출력하세요:
-
-{"title":"영어 레슨 제목(영어 3-5단어)","lines":[{"who":"Sage","en":"영어 문장","ipa":"/IPA/","sound":"한글발음","ko":"한국어뜻","note":"학습포인트(한국어)"},{"who":"Tom","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Sage","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Tom","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Sage","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."},{"who":"Tom","en":"...","ipa":"...","sound":"...","ko":"...","note":"..."}]}
-
-규칙: lines는 정확히 6개, Sage(학습자)와 Tom이 번갈아 대화, 중급 수준 문장, 상황에 완전히 맞는 어휘 사용.`;
-
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",
-      max_tokens:1200,
-      messages:[{role:"user",content:PROMPT}]
-    })
-  });
-
-  if(!res.ok) throw new Error(`API error: ${res.status}`);
-  const data=await res.json();
-
-  // content 블록에서 텍스트 추출
-  const text=data.content
-    .filter(c=>c.type==="text")
-    .map(c=>c.text)
-    .join("");
-
-  // JSON 파싱 — 백틱 제거 후 시도
-  const clean=text.replace(/```json|```/gi,"").trim();
-  let parsed;
-  try{
-    parsed=JSON.parse(clean);
-  }catch(e){
-    // JSON 블록만 추출 시도
-    const m=clean.match(/\{[\s\S]*\}/);
-    if(!m) throw new Error("JSON not found in response");
-    parsed=JSON.parse(m[0]);
-  }
-
-  return {
-    title:parsed.title||"New Lesson",
-    titleKo:situation.length>34?situation.slice(0,34)+"...":situation,
-    aiMade:true,
-    lines:parsed.lines.map(l=>mk(
-      l.who||"Sage",l.en||"",l.ipa||"",l.sound||"",l.ko||"",l.note||""
-    ))
-  };
+아래 JSON 형식으로만, 다른 설명 없이 출력해 주세요:
+{"title":"영어 제목(3-5단어)","lines":[
+{"who":"Sage","en":"영어문장","ipa":"/IPA발음기호/","sound":"한글발음","ko":"한국어뜻","note":"학습포인트(한국어)"},
+... 정확히 6줄, Sage와 Tom이 번갈아 대화, 중급 수준
+]}`;
 }
+
+document.getElementById("copyPromptBtn").addEventListener("click",()=>{
+  const s=document.getElementById("situationInputAI").value.trim();
+  if(!s){alert("상황을 먼저 입력해 주세요.");return;}
+  const prompt=buildPrompt(s);
+  navigator.clipboard.writeText(prompt).then(()=>{
+    alert("프롬프트가 복사되었습니다!\n\nGemini나 Claude에 붙여넣고, 받은 결과를 아래 칸에 다시 붙여넣으세요.");
+  }).catch(()=>{
+    // 클립보드 실패 시 텍스트 영역에 보여주기
+    const box=document.createElement("textarea");
+    box.value=prompt;document.body.appendChild(box);box.select();
+    try{document.execCommand("copy");alert("프롬프트가 복사되었습니다!");}
+    catch(e){prompt&&window.prompt("아래 내용을 복사하세요:",prompt);}
+    document.body.removeChild(box);
+  });
+});
+
+document.getElementById("importAIBtn").addEventListener("click",()=>{
+  const raw=document.getElementById("aiResultInput").value.trim();
+  if(!raw){alert("AI가 만든 결과(JSON)를 붙여넣어 주세요.");return;}
+  const parsed=robustParse(raw);
+  if(!parsed||!parsed.lines||!parsed.lines.length){
+    alert("결과를 레슨으로 변환하지 못했습니다.\nAI가 준 JSON 전체를 정확히 붙여넣었는지 확인해 주세요.");
+    return;
+  }
+  const s=document.getElementById("situationInputAI").value.trim();
+  const lesson={
+    title:parsed.title||"AI Lesson",
+    titleKo:s?(s.length>34?s.slice(0,34)+"...":s):"AI 생성 레슨",
+    aiMade:true,
+    lines:parsed.lines.slice(0,6).map(l=>mk(l.who||"Sage",l.en||"",l.ipa||"",l.sound||"",l.ko||"",l.note||""))
+  };
+  const idx=LESSONS.findIndex(x=>x.title===lesson.title);
+  if(idx>=0)LESSONS.splice(idx,1);
+  LESSONS.unshift(lesson);cur=0;
+  document.getElementById("aiResultInput").value="";
+  saveAll();stopAll();render();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+// ── JSON 복구 파서 ───────────────────────────────────────
+function robustParse(raw){
+  let t=String(raw||"").replace(/```json|```/gi,"").trim();
+  try{ return JSON.parse(t); }catch(e){}
+  const first=t.indexOf("{");const last=t.lastIndexOf("}");
+  if(first>=0&&last>first){
+    let body=t.slice(first,last+1);
+    try{ return JSON.parse(body); }catch(e){}
+    let fixed=body.replace(/,\s*([}\]])/g,"$1").replace(/[\u201C\u201D]/g,'"').replace(/[\u2018\u2019]/g,"'");
+    try{ return JSON.parse(fixed); }catch(e){}
+  }
+  try{
+    const titleM=t.match(/"title"\s*:\s*"([^"]*)"/);
+    const objs=[...t.matchAll(/\{[^{}]*"who"[^{}]*\}/g)].map(m=>{
+      const get=(k)=>{const mm=m[0].match(new RegExp('"'+k+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"'));return mm?mm[1].replace(/\\"/g,'"'):"";};
+      return {who:get("who"),en:get("en"),ipa:get("ipa"),sound:get("sound"),ko:get("ko"),note:get("note")};
+    }).filter(o=>o.en);
+    if(objs.length) return {title:titleM?titleM[1]:"AI Lesson",lines:objs};
+  }catch(e){}
+  return null;
+}
+
+// ── 빠른 생성기 (키워드) ─────────────────────────────────
+document.getElementById("makeLesson").addEventListener("click",()=>{
+  const input=document.getElementById("situationInput").value.trim();
+  if(!input){alert("상황을 먼저 입력해 주세요.");return;}
+  const lesson=genLesson(input);
+  const idx=LESSONS.findIndex(x=>x.title===lesson.title);
+  if(idx>=0)LESSONS.splice(idx,1);
+  LESSONS.unshift(lesson);cur=0;
+  saveAll();stopAll();render();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+function genLesson(input){
+  const s=input.toLowerCase();
+  if(has(s,["카페","커피","주문","아메리카노","라떼","음료"])) return lCafe(input);
+  if(has(s,["식당","레스토랑","메뉴","음식","주문","밥","점심","저녁","외식"])) return lRestaurant(input);
+  if(has(s,["만년필","펜촉","잉크","누수","수리","컨버터","닙"])) return lPen(input);
+  if(has(s,["회사","회의","일정","보고","거래처","변경","메일","업무","납기","바이어"])) return lWork(input);
+  if(has(s,["아침","산책","운동","걷기","러닝","공원","조깅"])) return lMorning(input);
+  if(has(s,["여행","호텔","공항","택시","길","예약","관광"])) return lTravel(input);
+  if(has(s,["합창","노래","연습","공연","음악","성가대"])) return lChoir(input);
+  if(has(s,["펌프","배관","설비","공장","엔지니어","설계","납품","사우디","중동"])) return lEng(input);
+  if(has(s,["병원","증상","아프","약국","진료","의사","처방"])) return lHospital(input);
+  if(has(s,["사격","총","과녁","안전","수칙","훈련"])) return lShooting(input);
+  return lGeneral(input);
+}
+function has(t,ws){return ws.some(w=>t.includes(w));}
+function tko(i){return i.length>34?i.slice(0,34)+"...":i;}
+
+function lCafe(i){return{title:"At a Quiet Cafe",titleKo:tko(i),aiMade:false,lines:[mk("Sage","May I have a hot coffee, please?","/meɪ aɪ hæv ə hɑːt ˈkɔːfi pliːz/","메이 아이 해브 어 핫 커피, 플리즈","따뜻한 커피 한 잔 주시겠어요?","May I have...?는 정중하게 주문할 때 좋습니다."),mk("Staff","Sure. Would you like it strong or mild?","/ʃʊr wʊd ju laɪk ɪt strɔːŋ ɔːr maɪld/","슈어. 우드 유 라이크 잇 스트롱 오어 마일드","진하게 드릴까요, 부드럽게 드릴까요?","strong or mild는 맛의 강도를 말할 때 씁니다."),mk("Sage","Mild, please. Not too strong.","/maɪld pliːz nɑːt tuː strɔːŋ/","마일드, 플리즈. 낫 투 스트롱","부드럽게 주세요. 너무 진하지 않게요.","not too strong은 여러 상황에 씁니다."),mk("Staff","No problem. Please have a seat.","/noʊ ˈprɑːbləm pliːz hæv ə siːt/","노우 프라블럼. 플리즈 해브 어 시트","알겠습니다. 자리에 앉아 주세요.","have a seat는 sit down보다 정중합니다."),mk("Sage","Could I sit by the window?","/kʊd aɪ sɪt baɪ ðə ˈwɪndoʊ/","쿠드 아이 싯 바이 더 윈도우","창가에 앉아도 될까요?","Could I...?는 정중한 요청입니다."),mk("Staff","Of course. That table is available.","/əv kɔːrs ðæt ˈteɪbəl ɪz əˈveɪləbəl/","어브 코스. 댓 테이블 이즈 어베일러블","물론입니다. 저 테이블이 비어 있습니다.","available은 '비어 있는'이라는 뜻입니다.")]}}
+
+function lRestaurant(i){return{title:"At a Restaurant",titleKo:tko(i),aiMade:false,lines:[mk("Sage","What do you recommend here?","/wʌt duː ju ˌrekəˈmend hɪr/","왓 두 유 레커멘드 히어","여기 뭐가 맛있어요?","What do you recommend?는 추천을 물을 때 핵심 표현입니다."),mk("Tom","The grilled fish is really good.","/ðə ɡrɪld fɪʃ ɪz ˈrɪli ɡʊd/","더 그릴드 피쉬 이즈 리얼리 굿","구운 생선이 정말 맛있어요.","grilled는 '구운'이라는 뜻입니다."),mk("Sage","Sounds good. I will try that.","/saʊndz ɡʊd aɪ wɪl traɪ ðæt/","사운즈 굿. 아이 윌 트라이 댓","좋네요. 그걸로 해볼게요.","I will try that.은 메뉴 고를 때 자연스럽습니다."),mk("Tom","Do you want something to drink?","/duː ju wɑːnt ˈsʌmθɪŋ tə drɪŋk/","두 유 원트 썸씽 투 드링크","마실 것도 시킬래요?","something to drink는 '마실 것'입니다."),mk("Sage","Just water for me, thanks.","/dʒʌst ˈwɔːtər fər mi θæŋks/","저스트 워터 퍼 미, 땡스","저는 물이면 됩니다, 고마워요.","Just ... for me는 간단히 주문할 때 좋습니다."),mk("Tom","Let us order then.","/let ʌs ˈɔːrdər ðen/","렛 어스 오더 덴","그럼 주문하죠.","Let us order.는 '주문합시다'입니다.")]}}
+
+function lPen(i){return{title:"A Fountain Pen Problem",titleKo:tko(i),aiMade:false,lines:[mk("Sage","My fountain pen is leaking a little.","/maɪ ˈfaʊntən pen ɪz ˈliːkɪŋ ə ˈlɪtəl/","마이 파운튼 펜 이즈 리킹 어 리틀","제 만년필에서 잉크가 조금 새고 있습니다.","leak은 액체가 '새다'라는 뜻입니다."),mk("Ted","Where is the ink coming from?","/wer ɪz ði ɪŋk ˈkʌmɪŋ frəm/","웨어 이즈 디 잉크 커밍 프럼","잉크가 어디에서 나오고 있나요?","Where is it coming from?은 원인을 물을 때 좋습니다."),mk("Sage","It seems to come from the nib.","/ɪt siːmz tə kʌm frəm ðə nɪb/","잇 씸즈 투 컴 프럼 더 닙","펜촉에서 나오는 것 같습니다.","It seems to...는 '...인 것 같다'입니다."),mk("Ted","Do not force it. Check it slowly.","/duː nɑːt fɔːrs ɪt tʃek ɪt ˈsloʊli/","두 낫 포스 잇. 체크 잇 슬로울리","억지로 하지 마세요. 천천히 확인하세요.","Do not force it.은 수리할 때 중요한 표현입니다."),mk("Sage","I want to understand the structure first.","/aɪ wɑːnt tə ˌʌndərˈstænd ðə ˈstrʌktʃər fɝːst/","아이 원트 투 언더스탠드 더 스트럭처 퍼스트","먼저 구조를 이해하고 싶습니다.","structure는 '구조'입니다."),mk("Ted","That is the best way to repair anything.","/ðæt ɪz ðə best weɪ tə rɪˈper ˈeniθɪŋ/","댓 이즈 더 베스트 웨이 투 리페어 애니씽","무엇이든 수리하는 가장 좋은 방법입니다.","the best way to...는 '...하는 최선의 방법'입니다.")]}}
+
+function lWork(i){return{title:"A Professional Request",titleKo:tko(i),aiMade:false,lines:[mk("Sage","May I ask about the schedule?","/meɪ aɪ æsk əˈbaʊt ðə ˈskedʒuːl/","메이 아이 애스크 어바웃 더 스케줄","일정에 대해 여쭤봐도 될까요?","May I ask about...?는 정중하게 문의할 때 좋습니다."),mk("Jim","Of course. Is there a problem?","/əv kɔːrs ɪz ðer ə ˈprɑːbləm/","어브 코스. 이즈 데어 어 프라블럼","물론입니다. 문제가 있나요?","Is there a problem?은 상황을 확인하는 표현입니다."),mk("Sage","Could we move it to next week?","/kʊd wi muːv ɪt tə nekst wiːk/","쿠드 위 무브 잇 투 넥스트 위크","다음 주로 옮길 수 있을까요?","move it to...는 일정을 '...로 옮기다'입니다."),mk("Jim","Let me check and get back to you.","/let mi tʃek ænd ɡet bæk tə ju/","렛 미 체크 앤드 겟 백 투 유","확인하고 다시 연락드리겠습니다.","get back to you는 '다시 연락하다'입니다."),mk("Sage","Thank you. I appreciate your flexibility.","/θæŋk ju aɪ əˈpriːʃieɪt jʊr ˌfleksəˈbɪləti/","땡큐. 아이 어프리시에이트 유어 플렉서빌러티","배려해 주셔서 감사합니다.","I appreciate...는 비즈니스 영어의 품격 있는 감사 표현입니다."),mk("Jim","No problem. That works for us.","/noʊ ˈprɑːbləm ðæt wɝːks fər ʌs/","노우 프라블럼. 댓 웍스 퍼 어스","문제없습니다. 저희도 괜찮습니다.","works for us는 '저희도 좋습니다'입니다.")]}}
+
+function lMorning(i){return{title:"Morning Walk",titleKo:tko(i),aiMade:false,lines:[mk("Sage","The morning air feels fresh today.","/ðə ˈmɔːrnɪŋ er fiːlz freʃ təˈdeɪ/","더 모닝 에어 필즈 프레쉬 투데이","오늘 아침 공기가 상쾌하게 느껴집니다.","fresh air는 '상쾌한 공기'입니다."),mk("Tom","It is a good day for a walk.","/ɪt ɪz ə ɡʊd deɪ fər ə wɔːk/","잇 이즈 어 굿 데이 퍼 어 워크","산책하기 좋은 날입니다.","a good day for...는 '...하기 좋은 날'입니다."),mk("Sage","Walking helps me clear my mind.","/ˈwɔːkɪŋ helps mi klɪr maɪ maɪnd/","워킹 헬프스 미 클리어 마이 마인드","걷기는 제 마음을 맑게 해줍니다.","clear my mind는 '마음을 정리하다'입니다."),mk("Tom","Say one sentence while you walk.","/seɪ wʌn ˈsentəns waɪl ju wɔːk/","세이 원 센턴스 와일 유 워크","걸으면서 한 문장을 말해 보세요.","while you walk는 '걸으면서'입니다."),mk("Sage","That sounds simple and powerful.","/ðæt saʊndz ˈsɪmpəl ænd ˈpaʊərfəl/","댓 사운즈 심플 앤드 파워풀","단순하면서도 힘 있게 들립니다.","simple and powerful은 콘텐츠 문구로도 좋습니다."),mk("Tom","Small practice becomes a strong habit.","/smɔːl ˈpræktɪs bɪˈkʌmz ə strɔːŋ ˈhæbɪt/","스몰 프랙티스 비컴즈 어 스트롱 해빗","작은 연습이 강한 습관이 됩니다.","habit은 '습관'입니다.")]}}
+
+function lTravel(i){return{title:"On a Trip",titleKo:tko(i),aiMade:false,lines:[mk("Sage","Could you help me find this place?","/kʊd ju help mi faɪnd ðɪs pleɪs/","쿠드 유 헬프 미 파인드 디스 플레이스","이 장소 찾는 것 좀 도와주실 수 있나요?","Could you help me...?는 여행에서 유용합니다."),mk("Staff","Sure. May I see the address?","/ʃʊr meɪ aɪ siː ði əˈdres/","슈어. 메이 아이 씨 디 어드레스","주소를 볼 수 있을까요?","May I see...?는 정중하게 보여 달라고 할 때 씁니다."),mk("Sage","Here it is. Is it far from here?","/hɪr ɪt ɪz ɪz ɪt fɑːr frəm hɪr/","히어 잇 이즈. 이즈 잇 파 프럼 히어","여기 있습니다. 여기서 먼가요?","Is it far from here?는 길 물을 때 핵심입니다."),mk("Staff","About ten minutes by taxi.","/əˈbaʊt ten ˈmɪnɪts baɪ ˈtæksi/","어바웃 텐 미닛츠 바이 택시","택시로 약 10분입니다.","about은 '대략'입니다."),mk("Sage","Thank you. That helps a lot.","/θæŋk ju ðæt helps ə lɑːt/","땡큐. 댓 헬프스 어 랏","큰 도움이 됩니다.","That helps a lot.은 진심 어린 감사 표현입니다."),mk("Staff","You are welcome. Enjoy your trip.","/ju ɑːr ˈwelkəm ɪnˈdʒɔɪ jʊr trɪp/","유 아 웰컴. 인조이 유어 트립","즐거운 여행 되세요.","Enjoy your trip.은 여행객에게 자주 씁니다.")]}}
+
+function lChoir(i){return{title:"Choir Practice",titleKo:tko(i),aiMade:false,lines:[mk("Sage","I have choir practice this evening.","/aɪ hæv ˈkwaɪər ˈpræktɪs ðɪs ˈiːvnɪŋ/","아이 해브 콰이어 프랙티스 디스 이브닝","오늘 저녁에 합창 연습이 있습니다.","choir는 '합창단'입니다."),mk("Tom","That sounds meaningful.","/ðæt saʊndz ˈmiːnɪŋfəl/","댓 사운즈 미닝풀","의미 있는 일처럼 들립니다.","meaningful은 '의미 있는'입니다."),mk("Sage","Singing with others gives me energy.","/ˈsɪŋɪŋ wɪð ˈʌðərz ɡɪvz mi ˈenərdʒi/","싱잉 위드 아더즈 기브즈 미 에너지","다른 사람들과 노래하면 에너지가 생깁니다.","with others는 '다른 사람들과 함께'입니다."),mk("Tom","Then enjoy the music and the people.","/ðen ɪnˈdʒɔɪ ðə ˈmjuːzɪk ænd ðə ˈpiːpəl/","덴 인조이 더 뮤직 앤드 더 피플","음악과 사람들을 즐기세요.","enjoy는 따뜻한 표현입니다."),mk("Sage","I will sing with a calm heart.","/aɪ wɪl sɪŋ wɪð ə kɑːm hɑːrt/","아이 윌 싱 위드 어 캄 하트","차분한 마음으로 노래하겠습니다.","calm heart는 '차분한 마음'입니다."),mk("Tom","That is the best voice.","/ðæt ɪz ðə best vɔɪs/","댓 이즈 더 베스트 보이스","그것이 가장 좋은 목소리입니다.","voice는 마음의 표현이기도 합니다.")]}}
+
+function lEng(i){return{title:"Technical Discussion",titleKo:tko(i),aiMade:false,lines:[mk("Sage","I would like to explain our pump system.","/aɪ wʊd laɪk tə ɪkˈspleɪn ˈaʊər pʌmp ˈsɪstəm/","아이 우드 라이크 투 익스플레인 아워 펌프 시스템","저희 펌프 시스템을 설명드리고 싶습니다.","I would like to...는 정중한 의사 표현입니다."),mk("Jim","Please go ahead. We are listening.","/pliːz ɡoʊ əˈhed wi ɑːr ˈlɪsənɪŋ/","플리즈 고우 어헤드. 위 아 리스닝","말씀하세요. 듣고 있겠습니다.","go ahead는 '계속하세요'입니다."),mk("Sage","This model handles high pressure efficiently.","/ðɪs ˈmɑːdəl ˈhændəlz haɪ ˈpreʃər ɪˈfɪʃəntli/","디스 마들 핸들즈 하이 프레셔 이피션틀리","이 모델은 고압을 효율적으로 처리합니다.","handle은 '처리하다'입니다."),mk("Jim","What is the delivery lead time?","/wɑːt ɪz ðə dɪˈlɪvəri liːd taɪm/","왓 이즈 더 딜리버리 리드 타임","납기는 얼마나 걸립니까?","lead time은 '납기'를 뜻합니다."),mk("Sage","Approximately eight weeks from the order.","/əˈprɑːksɪmətli eɪt wiːks frəm ðə ˈɔːrdər/","어프락시미틀리 에잇 윅스 프럼 디 오더","주문일로부터 약 8주입니다.","approximately는 '대략'입니다."),mk("Jim","That works for our project schedule.","/ðæt wɝːks fər ˈaʊər ˈprɑːdʒekt ˈskedʒuːl/","댓 웍스 퍼 아워 프라젝트 스케줄","저희 프로젝트 일정에 맞습니다.","works for ... schedule은 일정이 맞다는 표현입니다.")]}}
+
+function lHospital(i){return{title:"At the Clinic",titleKo:tko(i),aiMade:false,lines:[mk("Sage","I have a sore throat and a cough.","/aɪ hæv ə sɔːr θroʊt ænd ə kɔːf/","아이 해브 어 소어 쓰로우트 앤드 어 코프","목이 아프고 기침이 납니다.","sore throat는 '인후통'입니다."),mk("Staff","How long have you had these symptoms?","/haʊ lɔːŋ hæv ju hæd ðiːz ˈsɪmptəmz/","하우 롱 해브 유 해드 디즈 심텀즈","증상이 얼마나 됐나요?","symptoms는 '증상'입니다."),mk("Sage","For about three days now.","/fər əˈbaʊt θriː deɪz naʊ/","퍼 어바웃 쓰리 데이즈 나우","한 3일 정도 됐습니다.","For about ... now는 기간을 말할 때 씁니다."),mk("Staff","Do you have a fever?","/duː ju hæv ə ˈfiːvər/","두 유 해브 어 피버","열은 있나요?","fever는 '열'입니다."),mk("Sage","A little, especially at night.","/ə ˈlɪtəl ɪˈspeʃəli æt naɪt/","어 리틀, 이스페셜리 앳 나이트","조금요, 특히 밤에요.","especially는 '특히'입니다."),mk("Staff","I will prescribe some medicine.","/aɪ wɪl prɪˈskraɪb sʌm ˈmedɪsɪn/","아이 윌 프리스크라이브 썸 메디슨","약을 처방해 드리겠습니다.","prescribe는 '처방하다'입니다.")]}}
+
+function lShooting(i){return{title:"At the Range",titleKo:tko(i),aiMade:false,lines:[mk("Sage","Let us go over the safety rules first.","/let ʌs ɡoʊ ˈoʊvər ðə ˈseɪfti ruːlz fɝːst/","렛 어스 고우 오버 더 세이프티 룰즈 퍼스트","먼저 안전 수칙을 짚어봅시다.","go over는 '검토하다, 짚어보다'입니다."),mk("Tom","Always keep the muzzle pointed downrange.","/ˈɔːlweɪz kiːp ðə ˈmʌzəl ˈpɔɪntɪd ˈdaʊnreɪndʒ/","올웨이즈 킵 더 머즐 포인티드 다운레인지","총구는 항상 표적 방향을 향하게 하세요.","keep ... pointed는 '계속 ...를 향하게 하다'입니다."),mk("Sage","Got it. Finger off the trigger until ready.","/ɡɑːt ɪt ˈfɪŋɡər ɔːf ðə ˈtrɪɡər ənˈtɪl ˈredi/","갓 잇. 핑거 오프 더 트리거 언틸 레디","알겠어요. 준비될 때까지 방아쇠에서 손가락을 떼요.","finger off the trigger는 사격 안전의 기본입니다."),mk("Tom","Right. And wear your ear protection.","/raɪt ænd wer jʊr ɪr prəˈtekʃən/","라이트. 앤드 웨어 유어 이어 프로텍션","맞아요. 그리고 귀마개를 착용하세요.","ear protection은 '청력 보호구'입니다."),mk("Sage","Should I wait for the signal to shoot?","/ʃʊd aɪ weɪt fər ðə ˈsɪɡnəl tə ʃuːt/","슈드 아이 웨이트 퍼 더 시그널 투 슛","사격 신호를 기다려야 하나요?","wait for the signal은 '신호를 기다리다'입니다."),mk("Tom","Yes. Never shoot before the command.","/jes ˈnevər ʃuːt bɪˈfɔːr ðə kəˈmænd/","예스. 네버 슛 비포 더 커맨드","네. 명령 전에는 절대 쏘지 마세요.","command는 '명령, 구령'입니다.")]}}
+
+function lGeneral(i){return{title:"Everyday English",titleKo:tko(i),aiMade:false,lines:[mk("Sage","I want to say this in English.","/aɪ wɑːnt tə seɪ ðɪs ɪn ˈɪŋɡlɪʃ/","아이 원트 투 세이 디스 인 잉글리쉬","이 말을 영어로 하고 싶습니다.","어떤 상황에도 쓸 수 있는 문장입니다."),mk("Tom","Let us make it simple first.","/let ʌs meɪk ɪt ˈsɪmpəl fɝːst/","렛 어스 메이크 잇 심플 퍼스트","먼저 단순하게 만들어 봅시다.","make it simple은 '단순하게 만들다'입니다."),mk("Sage","I do not need a difficult sentence.","/aɪ duː nɑːt niːd ə ˈdɪfɪkəlt ˈsentəns/","아이 두 낫 니드 어 디피컬트 센턴스","어려운 문장은 필요 없습니다.","difficult sentence는 '어려운 문장'입니다."),mk("Tom","A clear sentence is better.","/ə klɪr ˈsentəns ɪz ˈbetər/","어 클리어 센턴스 이즈 베터","분명한 문장이 더 좋습니다.","clear는 '명확한'입니다."),mk("Sage","I can practice it many times.","/aɪ kæn ˈpræktɪs ɪt ˈmeni taɪmz/","아이 캔 프랙티스 잇 메니 타임즈","여러 번 연습할 수 있습니다.","many times는 반복 학습을 말합니다."),mk("Tom","That is how English comes back.","/ðæt ɪz haʊ ˈɪŋɡlɪʃ kʌmz bæk/","댓 이즈 하우 잉글리쉬 컴즈 백","그렇게 영어가 다시 돌아옵니다.","comes back은 '돌아오다'입니다.")]}}
 
 // ── 렌더 ─────────────────────────────────────────────────
 function colorize(s){return String(s||"").replace(/↗/g,'<span class="rise">↗</span>').replace(/↘/g,'<span class="fall">↘</span>');}
@@ -293,7 +404,7 @@ function buildTabs(){
       x.addEventListener("click",e=>{e.stopPropagation();if(!confirm(`"${L.title}" 삭제할까요?`))return;LESSONS.splice(i,1);if(cur>=LESSONS.length)cur=LESSONS.length-1;saveAll();stopAll();render();});
       b.appendChild(x);
     }
-    b.addEventListener("click",()=>{cur=i;S.set("sageEng_v4_cur",cur);stopAll();render();window.scrollTo({top:0,behavior:"smooth"});});
+    b.addEventListener("click",()=>{cur=i;S.set("sageHybrid_cur",cur);stopAll();render();window.scrollTo({top:0,behavior:"smooth"});});
     tabsBox.appendChild(b);
   });
 }
@@ -306,49 +417,24 @@ function stopAll(){if(typeof speechSynthesis!=="undefined")speechSynthesis.cance
 playAllBtn.addEventListener("click",function(){if(playing){stopAll();return;}if(typeof speechSynthesis==="undefined")return;playing=true;this.textContent="■ 멈춤";const L=LESSONS[cur];let i=0;const next=()=>{if(!playing||i>=L.lines.length){stopAll();return;}speechSynthesis.cancel();pickVoice();lineEls.forEach(e=>e.classList.remove("speaking"));lineEls[i].classList.add("speaking");lineEls[i].scrollIntoView({behavior:"smooth",block:"center"});const u=new SpeechSynthesisUtterance(L.lines[i].en);u.lang="en-US";u.rate=rate;if(voice)u.voice=voice;u.onend=()=>{i++;setTimeout(next,450);};speechSynthesis.speak(u);};next();});
 
 // ── 토글 ─────────────────────────────────────────────────
-function applyModes(){document.body.classList.toggle("all-ipa",ipaOn);document.body.classList.toggle("all-sound",soundOn);document.body.classList.toggle("all-ko",koOn);document.body.classList.toggle("all-note",noteOn);sc("ipaAll",ipaOn,"IPA");sc("soundAll",soundOn,"실전 발음");sc("koAll",koOn,"한글 뜻");sc("noteAll",noteOn,"표현 메모");}
-function sc(id,on,label){const b=document.getElementById(id);b.classList.toggle("on",on);b.textContent=on?`${label}: 항상 보기`:`${label}: 펼쳐서 보기`;}
-document.getElementById("ipaAll").addEventListener("click",()=>{ipaOn=!ipaOn;S.set("sageEng_v4_ipa",ipaOn);applyModes();});
-document.getElementById("soundAll").addEventListener("click",()=>{soundOn=!soundOn;S.set("sageEng_v4_sound",soundOn);applyModes();});
-document.getElementById("koAll").addEventListener("click",()=>{koOn=!koOn;S.set("sageEng_v4_ko",koOn);applyModes();});
-document.getElementById("noteAll").addEventListener("click",()=>{noteOn=!noteOn;S.set("sageEng_v4_note",noteOn);applyModes();});
+function applyModes(){document.body.classList.toggle("all-ipa",ipaOn);document.body.classList.toggle("all-sound",soundOn);document.body.classList.toggle("all-ko",koOn);document.body.classList.toggle("all-note",noteOn);scl("ipaAll",ipaOn,"IPA");scl("soundAll",soundOn,"실전 발음");scl("koAll",koOn,"한글 뜻");scl("noteAll",noteOn,"표현 메모");}
+function scl(id,on,label){const b=document.getElementById(id);b.classList.toggle("on",on);b.textContent=on?`${label}: 항상 보기`:`${label}: 펼쳐서 보기`;}
+document.getElementById("ipaAll").addEventListener("click",()=>{ipaOn=!ipaOn;S.set("sageHybrid_ipa",ipaOn);applyModes();});
+document.getElementById("soundAll").addEventListener("click",()=>{soundOn=!soundOn;S.set("sageHybrid_sound",soundOn);applyModes();});
+document.getElementById("koAll").addEventListener("click",()=>{koOn=!koOn;S.set("sageHybrid_ko",koOn);applyModes();});
+document.getElementById("noteAll").addEventListener("click",()=>{noteOn=!noteOn;S.set("sageHybrid_note",noteOn);applyModes();});
 
 // ── 속도 ─────────────────────────────────────────────────
 const speeds=[{r:1.0,l:"속도: 보통"},{r:0.82,l:"속도: 천천히"},{r:0.68,l:"속도: 아주 천천히"}];
 let si=speeds.findIndex(s=>Math.abs(s.r-rate)<0.01);if(si<0)si=0;
 const spBtn=document.getElementById("speed");spBtn.textContent=speeds[si].l;
-spBtn.addEventListener("click",function(){si=(si+1)%speeds.length;rate=speeds[si].r;S.set("sageEng_v4_rate",rate);this.textContent=speeds[si].l;});
+spBtn.addEventListener("click",function(){si=(si+1)%speeds.length;rate=speeds[si].r;S.set("sageHybrid_rate",rate);this.textContent=speeds[si].l;});
 
 // ── 예시 ─────────────────────────────────────────────────
 document.getElementById("sampleCafe").addEventListener("click",()=>{document.getElementById("situationInput").value="카페에서 따뜻한 커피를 주문하고 창가 자리를 부탁하는 상황";});
 document.getElementById("samplePen").addEventListener("click",()=>{document.getElementById("situationInput").value="만년필에서 잉크가 새서 수리점에 조심스럽게 문의하는 상황";});
 document.getElementById("sampleWork").addEventListener("click",()=>{document.getElementById("situationInput").value="거래처에 펌프 납기 지연을 정중하게 알리는 상황";});
 document.getElementById("resetLessons").addEventListener("click",()=>{if(!confirm("모든 레슨을 초기화할까요?"))return;LESSONS=BASE.map(l=>({...l}));cur=0;saveAll();stopAll();render();});
-
-// ── AI 레슨 만들기 ────────────────────────────────────────
-makeLessonBtn.addEventListener("click",async()=>{
-  const input=document.getElementById("situationInput").value.trim();
-  if(!input){alert("상황을 먼저 입력해 주세요.");return;}
-  makeLessonBtn.disabled=true;
-  makeLessonBtn.textContent="생성 중...";
-  aiStatus.classList.add("show");
-  try{
-    const lesson=await generateWithAI(input);
-    const idx=LESSONS.findIndex(x=>x.title===lesson.title);
-    if(idx>=0)LESSONS.splice(idx,1);
-    LESSONS.unshift(lesson);
-    cur=0;
-    saveAll();stopAll();render();
-    window.scrollTo({top:0,behavior:"smooth"});
-  }catch(e){
-    console.error(e);
-    alert("AI 레슨 생성 중 오류가 발생했습니다.\n\n"+e.message);
-  }finally{
-    makeLessonBtn.disabled=false;
-    makeLessonBtn.textContent="✨ AI 레슨 만들기";
-    aiStatus.classList.remove("show");
-  }
-});
 
 // ── 유틸 ─────────────────────────────────────────────────
 function mk(who,en,ipa,sound,ko,note){return{who,en,ipa,sound,ko,note};}
@@ -359,3 +445,4 @@ render();
 </script>
 </body>
 </html>
+
